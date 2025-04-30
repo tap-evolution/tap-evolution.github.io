@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap Evolution | Ein minimalistisches Browser-Erlebnis</title>
+    <style>
+        :root {
+            --background: #0a0a0a;
+            --text: #ffffff;
+            --accent: #0071e3;
+            --accent-hover: #0085ff;
+            --gradient-start: #1d1d1f;
+            --gradient-end: #000;
+            --success: #2fd158;
+            --card-bg: #1d1d1f;
+            --card-hover: #2d2d2f;
+            --disabled: rgba(255, 255, 255, 0.2);
+            --enabled: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background-color: rgba(10, 10, 10, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0 24px;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, var(--accent), #50a1ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 60px;
+        }
+        
+        .parallax-wrapper {
+            position: relative;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            perspective: 10px;
+        }
+        
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateZ(-10px) scale(2);
+            background: radial-gradient(circle at top right, #1e1e20, var(--background) 70%);
+            z-index: -1;
+        }
+        
+        /* Hintergrund-Elemente */
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+        
+        .bg-glow {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw;
+            height: 60vh;
+            background: radial-gradient(circle, rgba(0, 113, 227, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            border-radius: 50%;
+        }
+        
+        h1 {
+            font-size: 64px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -2px;
+            background: linear-gradient(90deg, #ffffff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+        
+        h2 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 32px;
+            max-width: 600px;
+            color: #a0a0a5;
+        }
+        
+        .section {
+            padding: 120px 0;
+            position: relative;
+        }
+        
+        .section-heading {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 60px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-heading:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            margin: 16px auto 0;
+            border-radius: 2px;
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+        
+        .feature {
+            flex: 1 1 300px;
+            padding: 40px;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            background-color: var(--card-hover);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .feature:hover:before {
+            opacity: 1;
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            color: var(--accent);
+            display: inline-block;
+            position: relative;
+        }
+        
+        .feature-icon:after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 113, 227, 0.1);
+            border-radius: 50%;
+            z-index: -1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .feature-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .feature-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #a0a0a5;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-top: 32px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 8px 20px rgba(0, 113, 227, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 113, 227, 0.4);
+        }
+        
+        .cta-button:hover:after {
+            opacity: 1;
+        }
+        
+        .cta-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 750px;
+            position: relative;
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 550px;
+            background-color: var(--card-bg);
+            border-radius: 32px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--accent), #50a1ff);
+            opacity: 0.8;
+        }
+        
+        .game-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tap-area {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background: radial-gradient(circle at 30% 30%, var(--accent-hover), #004c97);
+            box-shadow: 0 10px 30px rgba(0, 113, 227, 0.4), 
+                        inset 0 2px 10px rgba(255, 255, 255, 0.3),
+                        inset 0 -5px 15px rgba(0, 0, 0, 0.4);
+            transition: all 0.1s ease;
+            overflow: hidden;
+        }
+        
+        .tap-area:before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            transform: rotate(-45deg);
+        }
+        
+        .tap-area:active {
+            transform: scale(0.96);
+            box-shadow: 0 5px 15px rgba(0, 113, 227, 0.3),
+                        inset 0 2px 8px rgba(255, 255, 255, 0.2),
+                        inset 0 -3px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tap-icon {
+            font-size: 64px;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .score-display {
+            font-size: 42px;
+            font-weight: 700;
+            margin: 20px 0 5px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 113, 227, 0.4);
+        }
+        
+        .multiplier {
+            font-size: 18px;
+            color: #a0a0a5;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .upgrades {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 40px;
+        }
+        
+        .upgrade {
+            padding: 18px;
+            background-color: var(--enabled);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+        
+        .upgrade:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .upgrade.disabled {
+            background-color: var(--disabled);
+            cursor: not-allowed;
+            opacity: 0.75;
+            transform: none;
+        }
+        
+        .upgrade:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .upgrade:hover:before {
+            opacity: 1;
+        }
+        
+        .upgrade-name {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .upgrade-icon {
+            margin-right: 8px;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .upgrade-cost {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            margin-top: 2px;
+        }
+        
+        .upgrade-cost:before {
+            content: '⚡';
+            margin-right: 4px;
+            font-size: 12px;
+        }
+        
+        .upgrade-level {
+            font-size: 13px;
+            color: #a0a0a5;
+            margin-top: 4px;
+        }
+        
+        .achievements {
+            margin-top: 40px;
+            text-align: left;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 24px;
+        }
+        
+        .achievements-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .achievements-title:before {
+            content: '🏆';
+            margin-right: 8px;
+        }
+        
+        .achievement {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        .achievement.unlocked {
+            opacity: 1;
+            background-color: rgba(47, 209, 88, 0.1);
+            border-color: rgba(47, 209, 88, 0.2);
+        }
+        
+        .achievement-icon {
+            margin-right: 14px;
+            color: var(--success);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(47, 209, 88, 0.1);
+            border-radius: 50%;
+        }
+        
+        .achievement-info {
+            flex: 1;
+        }
+        
+        .achievement-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        
+        .achievement-desc {
+            font-size: 13px;
+            color: #a0a0a5;
+        }
+        
+        .reset-button {
+            background-color: #ff453a;
+            margin-top: 40px;
+        }
+        
+        .reset-button:hover {
+            background-color: #ff5e56;
+        }
+        
+        footer {
+            padding: 60px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #86868b;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        
+        footer .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Animation für Tap-Effekt */
+        @keyframes tapPulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.5); opacity: 0.4; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .tap-effect {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.6);
+            width: 100%;
+            height: 100%;
+            animation: tapPulse 0.6s forwards;
+            pointer-events: none;
+        }
+
+        /* Popup Animation */
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            60% { opacity: 1; }
+            100% { transform: translateY(-80px); opacity: 0; }
+        }
+
+        .score-popup {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+            pointer-events: none;
+            animation: floatUp 1.2s forwards;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Glowing effect für aktiven Zustand */
+        .game-active .tap-area {
+            animation: glowPulse 2s infinite alternate;
+        }
+        
+        @keyframes glowPulse {
+            0% { box-shadow: 0 10px 30px rgba(0, 113, 227, 0.4); }
+            100% { box-shadow: 0 10px 40px rgba(0, 113, 227, 0.7); }
+        }
+
+        /* Responsive Anpassungen */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 46px;
+            }
+            
+            h2 {
+                font-size: 20px;
+                padding: 0 20px;
+            }
+            
+            .section-heading {
+                font-size: 32px;
+            }
+            
+            .feature {
+                flex: 1 1 100%;
+                padding: 30px;
+            }
+            
+            .game-container {
+                padding: 30px 20px;
+                border-radius: 24px;
+            }
+            
+            .tap-area {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .upgrades {
+                grid-template-columns: 1fr;
+            }
+            
+            .score-display {
+                font-size: 36px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .section {
+                padding: 80px 0;
+            }
+            
+            h1 {
+                font-size: 38px;
+            }
+            
+            .cta-button {
+                padding: 12px 28px;
+                font-size: 15px;
+            }
+            
+            .tap-area {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .tap-icon {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">Tap Evolution</div>
+        </div>
+    </header>
+    
+    <div class="parallax-wrapper">
+        <div class="parallax-bg"></div>
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+        
+        <section class="hero">
+            <div class="container">
+                <h1>Tap Evolution</h1>
+                <h2>Ein minimalistisches Spielerlebnis, das dich stundenlang beschäftigen wird.</h2>
+                <a href="#game" class="cta-button">Jetzt spielen</a>
+            </div>
+        </section>
+        
+        <section class="section">
+            <div class="container">
+                <h3 class="section-heading">Warum Tap Evolution?</h3>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-title">Einfach & Fesselnd</div>
+                        <div class="feature-text">Beginne mit einem Tap und entdecke eine Welt von Möglichkeiten. Jeder Tap bringt dich weiter auf deinem Weg zum ultimativen Clicker-Champion.</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-title">Fortschritt speichern</div>
+                        <div class="feature-text">Dein Spielfortschritt wird automatisch gespeichert. Setze dein Abenteuer jederzeit fort und baue dein Tap-Imperium weiter aus.</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🏆</div>
+                        <div class="feature-title">Achievements</div>
+                        <div class="feature-text">Schalte Erfolge frei und setze dir neue Ziele. Jeder Meilenstein bringt dich näher an die Perfektion und bietet neue Herausforderungen.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="game" class="section game-section">
+            <div class="container">
+                <h3 class="section-heading">Spiele jetzt</h3>
+                <div class="game-container">
+                    <div class="score-display">0</div>
+                    <div class="multiplier">1 pro Tap</div>
+                    
+                    <div class="tap-area">
+                        <span class="tap-icon">⚡</span>
+                    </div>
+                    
+                    <div class="upgrades">
+                        <div class="upgrade" id="upgrade1">
+                            <div class="upgrade-name"><span class="upgrade-icon">⚙️</span> Tap-Verstärker</div>
+                            <div class="upgrade-cost">10</div>
+                            <div class="upgrade-level">Level: 0</div>
+                        </div>
+                        <div class="upgrade" id="upgrade2">
+                            <div class="upgrade-name"><span class="upgrade-icon">🔄</span> Auto-Tapper</div>
+                            <div class="upgrade-cost">50</div>
+                            <div class="upgrade-level">Level: 0</div>
+                        </div>
+                        <div class="upgrade" id="upgrade3">
+                            <div class="upgrade-name"><span class="upgrade-icon">⚡</span> Energie-Boost</div>
+                            <div class="upgrade-cost">200</div>
+                            <div class="upgrade-level">Level: 0</div>
+                        </div>
+                        <div class="upgrade" id="upgrade4">
+                            <div class="upgrade-name"><span class="upgrade-icon">✨</span> Quantensprung</div>
+                            <div class="upgrade-cost">1000</div>
+                            <div class="upgrade-level">Level: 0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="achievements">
+                        <div class="achievements-title">Achievements</div>
+                        <div class="achievement" id="achievement1">
+                            <div class="achievement-icon">🔶</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">Beginner</div>
+                                <div class="achievement-desc">Erreiche 100 Punkte</div>
+                            </div>
+                        </div>
+                        <div class="achievement" id="achievement2">
+                            <div class="achievement-icon">🔶</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">Enthusiast</div>
+                                <div class="achievement-desc">Erreiche 1.000 Punkte</div>
+                            </div>
+                        </div>
+                        <div class="achievement" id="achievement3">
+                            <div class="achievement-icon">🔶</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">Meister</div>
+                                <div class="achievement-desc">Erreiche 10.000 Punkte</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="cta-button reset-button">Spielstand zurücksetzen</button>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="container">
+                <p>Tap Evolution &copy; 2025 • Ein minimalistisches Spielerlebnis</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Spielvariablen
+        let score = 0;
+        let tapValue = 1;
+        let autoTapValue = 0;
+        let upgradeData = [
+            { level: 0, cost: 10, baseCost: 10, multiplier: 1.5 }, // Tap-Verstärker
+            { level: 0, cost: 50, baseCost: 50, multiplier: 1.3 }, // Auto-Tapper
+            { level: 0, cost: 200, baseCost: 200, multiplier: 1.7 }, // Energie-Boost
+            { level: 0, cost: 1000, baseCost: 1000, multiplier: 2 } // Quantensprung
+        ];
+        
+        // Achievements
+        const achievements = [
+            { id: 'achievement1', score: 100, unlocked: false },
+            { id: 'achievement2', score: 1000, unlocked: false },
+            { id: 'achievement3', score: 10000, unlocked: false }
+        ];
+        
+        // DOM-Elemente
+        const scoreDisplay = document.querySelector('.score-display');
+        const multiplierDisplay = document.querySelector('.multiplier');
+        const tapArea = document.querySelector('.tap-area');
+        const upgrades = document.querySelectorAll('.upgrade');
+        const resetButton = document.querySelector('.reset-button');
+        const gameContainer = document.querySelector('.game-container');
+
+        // Parallax-Effekt
+        const parallaxWrapper = document.querySelector('.parallax-wrapper');
+        parallaxWrapper.addEventListener('scroll', function() {
+            const scrollTop = parallaxWrapper.scrollTop;
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                const distance = section.getBoundingClientRect().top;
+                const speed = 0.5; // Parallax-Geschwindigkeit
+                
+                if (distance > -window.innerHeight && distance < window.innerHeight) {
+                    section.style.transform = `translateY(${distance * speed}px)`;
+                    section.style.opacity = 1 - (Math.abs(distance) / (window.innerHeight * 1.2));
+                }
+            });
+        });
+        
+        // Spiel initialisieren
+        function initGame() {
+            // Spielstand laden
+            loadGameState();
+            updateDisplay();
+            updateUpgrades();
+            checkAchievements();
+            
+            // Auto-Tapping starten
+            setInterval(function() {
+                if (autoTapValue > 0) {
+                    addScore(autoTapValue);
+                    updateDisplay();
+                    checkAchievements();
+                }
+            }, 1000);
+            
+            // Aktiven Zustand hinzufügen
+            gameContainer.classList.add('game-active');
+        }
+        
+        // Event-Listener für Taps
+        tapArea.addEventListener('click', function(e) {
+            addScore(tapValue);
+            updateDisplay();
+            checkAchievements();
+            createTapEffect(e);
+            createScorePopup(e, tapValue);
+        });
+        
+        // Upgrade-Clicks
+        upgrades.forEach((upgrade, index) => {
+            upgrade.addEventListener('click', function() {
+                purchaseUpgrade(index);
+            });
+        });
+        
+        // Reset-Button
+        resetButton.addEventListener('click', function() {
+            if (confirm('Möchtest du wirklich deinen gesamten Spielfortschritt zurücksetzen?')) {
+                resetGame();
+            }
+        });
+        
+        // Funktionen
+        function addScore(amount) {
+            score += amount;
+            saveGameState();
+        }
+        
+        function updateDisplay() {
+            scoreDisplay.textContent = formatNumber(Math.floor(score));
+            multiplierDisplay.textContent = `${formatNumber(tapValue)} pro Tap | Auto: ${formatNumber(autoTapValue)}/s`;
+        }
+        
+        function updateUpgrades() {
+            upgrades.forEach((upgrade, index) => {
+                const data = upgradeData[index];
+                upgrade.querySelector('.upgrade-cost').textContent = formatNumber(data.cost);
+                upgrade.querySelector('.upgrade-level').textContent = `Level: ${data.level}`;
+                
+                // HIER IST DIE FIXIERUNG: Wir drehen die Logik um, damit Upgrades deutlich sichtbar werden
+                if (score >= data.cost) {
+                    upgrade.classList.remove('disabled');
+                    // Füge Highlight-Effekt hinzu
+                    upgrade.style.boxShadow = "0 0 15px rgba(0, 113, 227, 0.4)";
+                    upgrade.style.borderColor = "rgba(0, 113, 227, 0.3)";
+                } else {
+                    upgrade.classList.add('disabled');
+                    // Entferne Highlight-Effekt
+                    upgrade.style.boxShadow = "none";
+                    upgrade.style.borderColor = "rgba(255, 255, 255, 0.05)";
+                }
+            });
+        }
+        
+        function purchaseUpgrade(index) {
+            const data = upgradeData[index];
+            
+            if (score >= data.cost) {
+                score -= data.cost;
+                data.level++;
+                
+                // Neue Kosten berechnen
+                data.cost = Math.floor(data.baseCost * Math.pow(data.multiplier, data.level));
+                
+                // Effekte anwenden
+                switch(index) {
+                    case 0: // Tap-Verstärker
+                        tapValue = Math.pow(1.2, data.level);
+                        break;
+                    case 1: // Auto-Tapper
+                        autoTapValue = data.level;
+                        break;
+                    case 2: // Energie-Boost
+                        tapValue *= 1.5;
+                        break;
+                    case 3: // Quantensprung
+                        tapValue *= 2;
+                        autoTapValue *= 2;
+                        break;
+                }
+                
+                // Kaufeffekt
+                createPurchaseEffect(upgrades[index]);
+                
+                updateDisplay();
+                updateUpgrades();
+                saveGameState();
+            }
+        }
+        
+        // Visueller Effekt beim Kauf eines Upgrades
+        function createPurchaseEffect(element) {
+            element.style.transform = "scale(1.05)";
+            element.style.backgroundColor = "rgba(0, 113, 227, 0.2)";
+            
+            setTimeout(() => {
+                element.style.transform = "";
+                element.style.backgroundColor = "";
+            }, 300);
+        }
+        
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!achievement.unlocked && score >= achievement.score) {
+                    achievement.unlocked = true;
+                    const achievementElement = document.getElementById(achievement.id);
+                    achievementElement.classList.add('unlocked');
+                    achievementElement.querySelector('.achievement-icon').textContent = '✅';
+                    
+                    // Animation für freigeschaltete Achievements
+                    achievementElement.style.transform = "scale(1.05)";
+                    setTimeout(() => {
+                        achievementElement.style.transform = "";
+                    }, 1000);
+                    
+                    saveGameState();
+                }
+            });
+        }
+        
+        function createTapEffect(e) {
+            const effect = document.createElement('div');
+            effect.classList.add('tap-effect');
+            tapArea.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 600);
+        }
+        
+        function createScorePopup(e, value) {
+            const popup = document.createElement('div');
+            popup.classList.add('score-popup');
+            popup.textContent = `+${formatNumber(value)}`;
+            
+            // Positionierung innerhalb des Tap-Areas mit etwas Zufälligkeit
+            const randomX = Math.random() * 60 - 30; // -30px bis +30px
+            const randomY = Math.random() * 20 - 40; // -40px bis -20px
+            
+            popup.style.left = `calc(50% + ${randomX}px)`;
+            popup.style.top = `calc(50% + ${randomY}px)`;
+            
+            tapArea.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.remove();
+            }, 1200);
+        }
+        
+        // Spielstands-Management
+        function saveGameState() {
+            const gameState = {
+                score: score,
+                tapValue: tapValue,
+                autoTapValue: autoTapValue,
+                upgradeData: upgradeData,
+                achievements: achievements
+            };
+            
+            localStorage.setItem('tapEvolutionSave', JSON.stringify(gameState));
+        }
+        
+        function loadGameState() {
+            const savedState = localStorage.getItem('tapEvolutionSave');
+            
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                
+                score = gameState.score;
+                tapValue = gameState.tapValue;
+                autoTapValue = gameState.autoTapValue;
+                upgradeData = gameState.upgradeData;
+                
+                if (gameState.achievements) {
+                    gameState.achievements.forEach((saved, index) => {
+                        if (saved.unlocked) {
+                            achievements[index].unlocked = true;
+                            document.getElementById(achievements[index].id).classList.add('unlocked');
+                            document.getElementById(achievements[index].id).querySelector('.achievement-icon').textContent = '✅';
+                        }
+                    });
+                }
+            }
+        }
+        
+        function resetGame() {
+            score = 0;
+            tapValue = 1;
+            autoTapValue = 0;
+            upgradeData = [
+                { level: 0, cost: 10, baseCost: 10, multiplier: 1.5 },
+                { level: 0, cost: 50, baseCost: 50, multiplier: 1.3 },
+                { level: 0, cost: 200, baseCost: 200, multiplier: 1.7 },
+                { level: 0, cost: 1000, baseCost: 1000, multiplier: 2 }
+            ];
+            
+            achievements.forEach(achievement => {
+                achievement.unlocked = false;
+                document.getElementById(achievement.id).classList.remove('unlocked');
+                document.getElementById(achievement.id).querySelector('.achievement-icon').textContent = '🔶';
+            });
+            
+            // Reset-Animation für Spielcontainer
+            gameContainer.style.transform = "scale(0.98)";
+            gameContainer.style.opacity = "0.8";
+            
+            setTimeout(() => {
+                gameContainer.style.transform = "";
+                gameContainer.style.opacity = "";
+            }, 300);
+            
+            updateDisplay();
+            updateUpgrades();
+            saveGameState();
+        }
+        
+        // Hilfsfunktion für Zahlenformatierung
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1) + 'B';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            } else {
+                return num;
+            }
+        }
+        
+        // Spiel starten
+        initGame();
+    </script>
+</body>
+</html>
